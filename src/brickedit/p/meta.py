@@ -160,7 +160,7 @@ class InputAxisMeta(EnumMeta):
     ALWAYS_ON: Final[str] = 'AlwaysOn'
     CUSTOM: Final[str] = 'Custom'
 
-    STEERING: Final[str] = 'Stering'
+    STEERING: Final[str] = 'Steering'
     STEERING_ALT: Final[str] = 'SteeringAlt'
     THROTTLE: Final[str] = 'Throttle'
 
