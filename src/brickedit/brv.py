@@ -341,7 +341,7 @@ class BRVFile:
 
 
 
-    def deserialize(self, buffer: bytes | bytearray) -> None:
+    def deserialize(self, buffer: bytes | bytearray, allow_unknown: bool = True) -> None:
         """Deserialize a bytearray into this vehicle.
 
         Args:
@@ -383,6 +383,8 @@ class BRVFile:
         property_names_list = []
         prop_to_index_to_value = defaultdict(list)
 
+        # Get the default if the property deserialization class is not found
+        prop_deserialization_class_default = _p.UnknownPropertyMeta if allow_unknown else None
         for i in range(num_properties):
             # print(buffer.getvalue()[buffer.tell():])
             # Property name
@@ -391,7 +393,7 @@ class BRVFile:
             # Add it to the list of index → property
             property_names_list.append(prop)
             # Get property's deserializer for later
-            prop_deserialization_class = pmeta_registry_get(prop)
+            prop_deserialization_class = pmeta_registry_get(prop, prop_deserialization_class_default)
             if prop_deserialization_class is None:
                 raise BrickError(f"Unknown property '{prop}'")
 
@@ -440,6 +442,7 @@ class BRVFile:
         unpack_2H = struct.Struct('<2H').unpack
 
         # For each brick
+        brick_meta_default = _bt.UnknownBrickMeta if allow_unknown else None
         for i in range(num_bricks):
             # Brick type
             # print(f'{brick_types_list=}, {buffer.getvalue()[buffer.tell()-30:buffer.tell()]}'
@@ -447,7 +450,7 @@ class BRVFile:
             brick_type_index = unpack_H(read(2))[0]
             # print(f'{brick_type_index=}')
             brick_type_name = brick_types_list[brick_type_index]
-            brick_meta = _bt.bt_registry.get(brick_type_name)
+            brick_meta = _bt.bt_registry.get(brick_type_name, brick_meta_default)
             if brick_meta is None:
                 raise BrickError(f"Unknown brick type '{brick_type_name}'")
 
